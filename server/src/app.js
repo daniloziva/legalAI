@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const { env } = require('./config/env');
 const { requestLogger } = require('./middleware/requestLogger');
@@ -20,6 +21,21 @@ app.use(requestLogger);
 app.use('/api', healthRoutes);
 app.use('/api', extractRoutes);
 app.use('/api', exportRoutes);
+
+// Serve React frontend in production
+const publicDir = path.join(__dirname, '..', 'public');
+app.use(express.static(publicDir));
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/')) return next();
+  res.sendFile(path.join(publicDir, 'index.html'));
+});
+
+// 404 handler (API only)
+app.use((_req, res) => {
+  res.status(404).json({
+    error: { code: 'NOT_FOUND', message: 'The requested resource was not found' },
+  });
+});
 
 app.use(errorHandler);
 

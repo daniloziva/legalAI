@@ -1,0 +1,8 @@
+{
+  "name": "legalai",
+  "private": true,
+  "scripts": {
+    "build": "cd client && npm install && npx vite build --outDir ../server/public && cd ../server && npm install",
+    "start": "cd server && node src/index.js"
+  }
+}
