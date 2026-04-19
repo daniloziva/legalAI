@@ -1,0 +1,21 @@
+{
+  "name": "legalai-server",
+  "version": "1.0.0",
+  "description": "LegalAI backend — extract structured data from Serbian legal PDFs",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "axios": "^1.7",
+    "cors": "^2.8",
+    "dotenv": "^16.4",
+    "exceljs": "^4.4.0",
+    "express": "^4.22.1",
+    "multer": "^2.1.1",
+    "pino": "^9.6",
+    "pino-http": "^10.4",
+    "zod": "^3.25.76"
+  }
+}
