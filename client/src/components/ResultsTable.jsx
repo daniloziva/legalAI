@@ -14,18 +14,7 @@ function getRowStatus(result) {
   return 'high';
 }
 
-function getStatusBadgeLabel(status) {
-  switch (status) {
-    case 'error': return 'Greska';
-    case 'processing': return 'Obrada...';
-    case 'low': return 'Delimicno';
-    case 'medium': return 'Zavrseno';
-    case 'high': return 'Zavrseno';
-    default: return '';
-  }
-}
-
-function EditableCell({ value, confidence, fieldKey, rowIndex, onUpdate, jmbgValid }) {
+function EditableCell({ value, confidence, fieldKey, rowIndex, onUpdate }) {
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
 
@@ -59,7 +48,6 @@ function EditableCell({ value, confidence, fieldKey, rowIndex, onUpdate, jmbgVal
   const isLow = confidence === 'low';
   const isMedium = confidence === 'medium';
   const isEmpty = !value;
-  const jmbgInvalid = fieldKey === 'jmbg' && jmbgValid === false;
 
   const cellClass = [
     'results-cell-field',
@@ -90,12 +78,6 @@ function EditableCell({ value, confidence, fieldKey, rowIndex, onUpdate, jmbgVal
           <span className={isEmpty ? 'cell-empty-value' : ''}>
             {isEmpty ? '\u2014' : value}
           </span>
-          {jmbgInvalid && (
-            <span className="cell-jmbg-warning">
-              <AlertTriangle size={11} />
-              Neispravan JMBG
-            </span>
-          )}
         </div>
       )}
     </td>
@@ -111,6 +93,8 @@ export default function ResultsTable({
 }) {
   if (!results || results.length === 0) return null;
 
+  const fieldColSpan = FIELD_KEYS.length;
+
   return (
     <div className="results-table-wrapper">
       <table className="results-table">
@@ -118,11 +102,9 @@ export default function ResultsTable({
           <tr>
             <th className="col-num">#</th>
             <th className="col-doc">Dokument</th>
-            <th>Broj predmeta</th>
-            <th>Ime stranke</th>
-            <th>JMBG</th>
-            <th>Ime klijenta</th>
-            <th>Iznos</th>
+            {FIELD_KEYS.map(key => (
+              <th key={key}>{FIELD_LABELS[key]}</th>
+            ))}
             <th className="col-status">Status</th>
           </tr>
         </thead>
@@ -139,7 +121,7 @@ export default function ResultsTable({
                   onClick={() => onSelectRow(idx)}
                 >
                   <td className="col-num">{idx + 1}</td>
-                  <td colSpan={6} className="results-error-cell">
+                  <td colSpan={fieldColSpan} className="results-error-cell">
                     <span className="results-error-message">
                       {result.error}
                     </span>
@@ -162,7 +144,7 @@ export default function ResultsTable({
               return (
                 <tr key={idx} className="results-row results-row--retrying">
                   <td className="col-num">{idx + 1}</td>
-                  <td colSpan={6}>
+                  <td colSpan={fieldColSpan}>
                     <span className="results-retrying-text">Ponovna obrada...</span>
                   </td>
                   <td className="col-status">
@@ -192,7 +174,6 @@ export default function ResultsTable({
                       fieldKey={fieldKey}
                       rowIndex={idx}
                       onUpdate={onUpdateField}
-                      jmbgValid={fieldKey === 'jmbg' ? field?.valid : undefined}
                     />
                   );
                 })}

@@ -3,7 +3,6 @@ const crypto = require('crypto');
 const multer = require('multer');
 const { ocr } = require('../services/ocr');
 const { extract } = require('../services/extraction');
-const { validateJmbg } = require('../lib/jmbg');
 const { logger } = require('../middleware/requestLogger');
 
 const router = Router();
@@ -111,10 +110,10 @@ async function processFiles(batchId, job) {
       // Step 2: Extraction
       const { fields, tokenUsage } = await extract(ocrText);
 
-      // Step 3: JMBG validation
-      if (fields.jmbg && fields.jmbg.value) {
-        const jmbgResult = validateJmbg(fields.jmbg.value);
-        fields.jmbg.valid = jmbgResult.valid;
+      // Step 3: Default pdvPercent to 20 if LLM didn't find an explicit value
+      if (!fields.pdvPercent.value) {
+        fields.pdvPercent.value = '20';
+        fields.pdvPercent.confidence = 'low';
       }
 
       job.results.push({

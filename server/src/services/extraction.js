@@ -9,7 +9,7 @@ const RETRY_DELAY_MS = 5000;
 
 // Load system prompt once at module init
 const systemPrompt = fs.readFileSync(
-  path.join(__dirname, '..', 'prompts', 'extract-v1.txt'),
+  path.join(__dirname, '..', 'prompts', 'extract-v2.txt'),
   'utf-8',
 );
 
@@ -20,11 +20,15 @@ const fieldSchema = z.object({
 });
 
 const extractionSchema = z.object({
-  brojPredmeta: fieldSchema,
-  imeStranke:   fieldSchema,
-  jmbg:         fieldSchema,
-  imeKlijenta:  fieldSchema,
-  iznos:        fieldSchema,
+  ban:              fieldSchema,
+  javniIzvrsitelj:  fieldSchema,
+  brojPredmeta:     fieldSchema,
+  iznosPredujma:    fieldSchema,
+  pdvPercent:       fieldSchema,
+  racunPredracun:   fieldSchema,
+  opisUsluge:       fieldSchema,
+  imeStranke:       fieldSchema,
+  imeKlijenta:      fieldSchema,
 });
 
 /**

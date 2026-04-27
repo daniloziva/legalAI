@@ -11,17 +11,20 @@ const router = Router();
 const exportFieldSchema = z.object({
   value: z.string().max(1000),
   confidence: z.enum(['high', 'medium', 'low']),
-  valid: z.boolean().optional(),
 });
 
 const exportResultSchema = z.object({
   filename: z.string().max(500),
   fields: z.object({
+    ban: exportFieldSchema,
+    javniIzvrsitelj: exportFieldSchema,
     brojPredmeta: exportFieldSchema,
+    iznosPredujma: exportFieldSchema,
+    pdvPercent: exportFieldSchema,
+    racunPredracun: exportFieldSchema,
+    opisUsluge: exportFieldSchema,
     imeStranke: exportFieldSchema,
-    jmbg: exportFieldSchema,
     imeKlijenta: exportFieldSchema,
-    iznos: exportFieldSchema,
   }),
 });
 
@@ -48,7 +51,7 @@ router.post('/export', async (req, res, next) => {
     const buffer = await generateExcel(parsed.data.results);
 
     const today = new Date().toISOString().slice(0, 10);
-    const filename = `LegalAI_Ekstrakcija_${today}.xlsx`;
+    const filename = `A1_takse_${today}.xlsx`;
 
     res.setHeader(
       'Content-Type',

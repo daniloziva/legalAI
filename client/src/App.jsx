@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { extractDocuments, downloadExcel, submitBatch, pollBatch } from './api.js';
-import { validateJmbg } from './constants.js';
 import Header from './components/Header.jsx';
 import UploadZone from './components/UploadZone.jsx';
 import ProcessingBar from './components/ProcessingBar.jsx';
@@ -132,19 +131,14 @@ export default function App() {
     setResults(prev => {
       if (!prev) return prev;
       const updated = [...prev];
-      const fieldUpdate = {
-        ...updated[rowIndex].fields[fieldName],
-        value: newValue,
-      };
-      // Re-validate JMBG on edit
-      if (fieldName === 'jmbg') {
-        fieldUpdate.valid = newValue ? validateJmbg(newValue) : undefined;
-      }
       updated[rowIndex] = {
         ...updated[rowIndex],
         fields: {
           ...updated[rowIndex].fields,
-          [fieldName]: fieldUpdate,
+          [fieldName]: {
+            ...updated[rowIndex].fields[fieldName],
+            value: newValue,
+          },
         },
       };
       return updated;
@@ -171,7 +165,7 @@ export default function App() {
       const a = document.createElement('a');
       const date = new Date().toISOString().split('T')[0];
       a.href = url;
-      a.download = `LegalAI_Ekstrakcija_${date}.xlsx`;
+      a.download = `A1_takse_${date}.xlsx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

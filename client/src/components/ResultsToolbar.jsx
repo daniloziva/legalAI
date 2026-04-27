@@ -17,7 +17,7 @@ export default function ResultsToolbar({ count, onExport, exporting }) {
         ) : (
           <Download size={16} />
         )}
-        <span>Preuzmi Excel</span>
+        <span>Preuzmi A1 Excel</span>
       </button>
     </div>
   );
