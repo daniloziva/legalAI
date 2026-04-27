@@ -23,6 +23,7 @@ const exportResultSchema = z.object({
     pdvPercent: exportFieldSchema,
     racunPredracun: exportFieldSchema,
     opisUsluge: exportFieldSchema,
+    valuta: exportFieldSchema,
     imeStranke: exportFieldSchema,
     imeKlijenta: exportFieldSchema,
   }),

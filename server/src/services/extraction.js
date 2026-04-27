@@ -27,6 +27,7 @@ const extractionSchema = z.object({
   pdvPercent:       fieldSchema,
   racunPredracun:   fieldSchema,
   opisUsluge:       fieldSchema,
+  valuta:           fieldSchema,
   imeStranke:       fieldSchema,
   imeKlijenta:      fieldSchema,
 });

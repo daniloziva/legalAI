@@ -138,7 +138,7 @@ async function generateExcel(results) {
       konacanRacunDatum: '',
       racunKonacniRacun: '',
       opisUsluge: sanitizeForExcel(fields.opisUsluge.value),
-      valuta: '',
+      valuta: sanitizeForExcel(fields.valuta.value),
       datumSlanjaA1: '',
       tekuciRacun: '',
       pozivNaBroj: sanitizeForExcel(fields.brojPredmeta.value),

@@ -29,9 +29,11 @@ FIELDS:
    - "predujam-Pojedinačne radnje" (advance for individual enforcement actions)
    Look at the document content to determine which category applies. If the document is about initial case opening, use "inicijalni predujam". If it is about enforcement officer compensation after completed work, use "nagrada". For specific types of advance payments, match to the appropriate predujam subcategory. Set confidence to "medium" or "low" if the classification is uncertain.
 
-8. imeStranke (party/debtor name) - The full name of the main party (typically the debtor / "извршни дужник"). Look after "тужилац", "тужени", "извршни дужник", "дужник", "окривљени", "подносилац", "странка". Return the full name as it appears.
+8. valuta (payment deadline in days) - The number of days until the payment is due. Look for phrases like "у року од 8 дана", "u roku od 15 dana", "рок за плаћање", "rok za plaćanje", "валута", "dana od prijema". Extract ONLY the number (e.g., "8", "15", "3", "0"). If the document says payment is due immediately ("одмах", "odmah"), return "0". Do NOT include the word "dana" or any text — return only the number. If no payment deadline is found, set value to an empty string and confidence to "low".
 
-9. imeKlijenta (client name) - The name of the CLIENT company that engaged the enforcement. This is typically A1 Serbia, a bank, telecom, or other enterprise. Look for "поверилац", "извршни поверилац", "тужилац" when it is a company, or company identifiers: "д.о.о.", "DOO", "a.d.", "А.Д.", "банка". Prefer company names over personal names.
+9. imeStranke (party/debtor name) - The full name of the main party (typically the debtor / "извршни дужник"). Look after "тужилац", "тужени", "извршни дужник", "дужник", "окривљени", "подносилац", "странка". Return the full name as it appears.
+
+10. imeKlijenta (client name) - The name of the CLIENT company that engaged the enforcement. This is typically A1 Serbia, a bank, telecom, or other enterprise. Look for "поверилац", "извршни поверилац", "тужилац" when it is a company, or company identifiers: "д.о.о.", "DOO", "a.d.", "А.Д.", "банка". Prefer company names over personal names.
 
 CONFIDENCE LEVELS:
 - "high": The field was clearly found with an unambiguous label or in an expected location. OCR quality for this text appears good.
@@ -51,6 +53,7 @@ Respond with a single JSON object. No other text, no markdown, no explanation.
   "pdvPercent": { "value": "...", "confidence": "high|medium|low" },
   "racunPredracun": { "value": "...", "confidence": "high|medium|low" },
   "opisUsluge": { "value": "...", "confidence": "high|medium|low" },
+  "valuta": { "value": "...", "confidence": "high|medium|low" },
   "imeStranke": { "value": "...", "confidence": "high|medium|low" },
   "imeKlijenta": { "value": "...", "confidence": "high|medium|low" }
 }

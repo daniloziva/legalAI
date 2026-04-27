@@ -6,6 +6,7 @@ export const FIELD_KEYS = [
   'pdvPercent',
   'racunPredracun',
   'opisUsluge',
+  'valuta',
   'imeStranke',
   'imeKlijenta',
 ];
@@ -18,6 +19,7 @@ export const FIELD_LABELS = {
   pdvPercent: 'PDV %',
   racunPredracun: 'Račun/Predračun',
   opisUsluge: 'Opis usluge',
+  valuta: 'Valuta (dana)',
   imeStranke: 'Ime stranke',
   imeKlijenta: 'Ime klijenta',
 };
