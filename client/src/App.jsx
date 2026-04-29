@@ -101,14 +101,14 @@ export default function App() {
       setLoading(false);
       setProgress(null);
 
-      // Auto-open first problematic row
-      const problemIdx = findFirstProblematicRow(extractedResults);
-      if (problemIdx >= 0) {
-        // Need to use the files from current closure for object URL
-        if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
-        previewUrlRef.current = URL.createObjectURL(files[problemIdx]);
-        setSelectedRow(problemIdx);
-      }
+      // // Auto-open first problematic row
+      // const problemIdx = findFirstProblematicRow(extractedResults);
+      // if (problemIdx >= 0) {
+      //   // Need to use the files from current closure for object URL
+      //   if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+      //   previewUrlRef.current = URL.createObjectURL(files[problemIdx]);
+      //   setSelectedRow(problemIdx);
+      // }
     } catch (err) {
       if (err.message === 'Cancelled') {
         setLoading(false);
