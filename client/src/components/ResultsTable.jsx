@@ -14,7 +14,7 @@ function getRowStatus(result) {
   return 'high';
 }
 
-function EditableCell({ value, confidence, fieldKey, rowIndex, onUpdate }) {
+function EditableCell({ value, confidence, flags, fieldKey, rowIndex, onUpdate }) {
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
 
@@ -48,6 +48,7 @@ function EditableCell({ value, confidence, fieldKey, rowIndex, onUpdate }) {
   const isLow = confidence === 'low';
   const isMedium = confidence === 'medium';
   const isEmpty = !value;
+  const isTransliterated = Boolean(flags?.includes('transliterated'));
 
   const cellClass = [
     'results-cell-field',
@@ -69,6 +70,14 @@ function EditableCell({ value, confidence, fieldKey, rowIndex, onUpdate }) {
         />
       ) : (
         <div className="cell-display">
+          {isTransliterated && (
+            <span
+              className="cell-translit-badge"
+              title="Automatski prevedeno sa ćirilice na latinicu"
+            >
+              t
+            </span>
+          )}
           {(isLow || isMedium) && (
             <AlertTriangle
               size={12}
@@ -177,6 +186,7 @@ export default function ResultsTable({
                       key={fieldKey}
                       value={field?.value || ''}
                       confidence={field?.confidence || 'low'}
+                      flags={field?.flags}
                       fieldKey={fieldKey}
                       rowIndex={idx}
                       onUpdate={onUpdateField}

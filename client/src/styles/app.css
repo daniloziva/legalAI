@@ -537,6 +537,31 @@ body {
 }
 
 /* ---- Results table ---- */
+/* Small "t" marker in the top-right corner of a cell whose value was
+   auto-transliterated from Cyrillic to Latin (tooltip via title attr) */
+.results-cell-field {
+  position: relative;
+}
+.cell-translit-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--color-accent);
+  background: var(--color-accent-bg);
+  border: 1px solid var(--color-accent);
+  border-radius: 50%;
+  cursor: help;
+  user-select: none;
+}
 .results-table-wrapper {
   overflow-x: auto;
   /* Visible container edge: at wide layouts the table scrolls horizontally,
