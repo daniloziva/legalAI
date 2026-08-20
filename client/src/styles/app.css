@@ -43,23 +43,23 @@ body {
 
 /* ---- Header ---- */
 .header {
-  height: 64px;
-  background: var(--color-primary);
+  height: 76px;
+  background: #FFFFFF;
   border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
   z-index: 100;
 }
 .header-inner {
-  max-width: var(--content-max-width);
-  margin: 0 auto;
-  padding: 0 32px;
+  /* Full-width: logo sits relative to the viewport edge, not the centered
+     content column. clamp() ≈ 40–50px on typical screens, less on narrow. */
+  padding: 0 clamp(24px, 3vw, 48px);
   height: 100%;
   display: flex;
   align-items: center;
 }
 .header-logo-img {
-  height: 36px;
+  height: 44px;
   width: auto;
 }
 
@@ -89,6 +89,84 @@ body {
   color: var(--color-error);
   cursor: pointer;
   padding: 0 4px;
+}
+
+/* ---- Token gate ---- */
+.token-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 96px 16px;
+}
+.token-gate-card {
+  width: 100%;
+  max-width: 360px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.token-gate-icon {
+  color: var(--color-text-secondary);
+}
+.token-gate-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+.token-gate-text {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+.token-gate-input {
+  width: 100%;
+  font-family: var(--font-family);
+  font-size: 14px;
+  color: var(--color-text);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  padding: 8px 10px;
+  transition: border-color 150ms, background-color 150ms;
+}
+.token-gate-input:focus {
+  background: var(--color-surface);
+  border-color: var(--color-accent);
+}
+.token-gate-error {
+  align-self: flex-start;
+  font-size: 12px;
+  color: var(--color-error);
+}
+.token-gate-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  height: 40px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color 150ms;
+}
+.token-gate-btn:hover {
+  background: var(--color-accent-hover);
+}
+.token-gate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* ---- Upload zone ---- */
@@ -461,6 +539,13 @@ body {
 /* ---- Results table ---- */
 .results-table-wrapper {
   overflow-x: auto;
+  /* Visible container edge: at wide layouts the table scrolls horizontally,
+     and the border makes the cut-off read as a scroll region, not a bug. */
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.results-table tbody tr:last-child td {
+  border-bottom: none;
 }
 .results-table {
   width: 100%;
@@ -650,6 +735,10 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  /* Flex child: without min-width 0 a long filename pushes the close button
+     out of the header instead of truncating. */
+  min-width: 0;
+  margin-right: 12px;
 }
 .pdf-preview-close {
   background: none;
@@ -832,18 +921,24 @@ body {
   }
   .preview-modal-fields {
     width: 100%;
-    max-height: 200px;
+    max-height: 280px;
     border-right: none;
     border-bottom: 1px solid var(--color-border);
     flex-direction: row;
     flex-wrap: wrap;
     padding: 12px;
   }
+  /* In the row-wrap layout the title must span the full row, otherwise it
+     behaves as a flex column and misaligns the first field card. */
+  .preview-modal-fields-title {
+    flex-basis: 100%;
+  }
   .preview-modal-fields .preview-field {
     flex: 1 1 45%;
   }
-  .results-table thead th,
-  .results-table tbody td {
+  /* Give data columns room to breathe, but keep the narrow # column narrow. */
+  .results-table thead th:not(.col-num),
+  .results-table tbody td:not(.col-num) {
     min-width: 120px;
   }
   .col-doc {

@@ -7,10 +7,10 @@ const CONFIDENCE_CONFIG = {
 };
 
 const FILE_STATUS_CONFIG = {
-  queued: { className: 'badge--neutral', label: 'Na cekanju', icon: Clock },
+  queued: { className: 'badge--neutral', label: 'Na čekanju', icon: Clock },
   processing: { className: 'badge--accent badge--pulse', label: 'Obrada...', icon: Loader2 },
-  done: { className: 'badge--success', label: 'Zavrseno', icon: Check },
-  failed: { className: 'badge--error', label: 'Greska', icon: X },
+  done: { className: 'badge--success', label: 'Završeno', icon: Check },
+  failed: { className: 'badge--error', label: 'Greška', icon: X },
 };
 
 export default function StatusBadge({ type = 'confidence', status, confidence }) {

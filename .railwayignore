@@ -1,0 +1,5 @@
+# Keep real client legal PDFs and internal planning docs out of the deploy image.
+# client/ is NOT excluded — its source is needed for the build.
+docs/
+PLAN.md
+UX-SPEC.md

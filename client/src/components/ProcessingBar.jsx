@@ -8,7 +8,7 @@ export default function ProcessingBar({ total, completed, onCancel }) {
           Obrada u toku... {completed} od {total} dokumenata
         </span>
         <button className="processing-bar-cancel" onClick={onCancel} type="button">
-          Otkazi
+          Otkaži
         </button>
       </div>
       <div className="processing-bar-track">

@@ -1,6 +1,16 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { extractDocuments, downloadExcel, submitBatch, pollBatch } from './api.js';
+import {
+  extractDocuments,
+  downloadExcel,
+  submitBatch,
+  pollBatch,
+  getToken,
+  onAuthChange,
+  getErrorMessage,
+  isTransientError,
+} from './api.js';
 import Header from './components/Header.jsx';
+import TokenGate from './components/TokenGate.jsx';
 import UploadZone from './components/UploadZone.jsx';
 import ProcessingBar from './components/ProcessingBar.jsx';
 import ResultsToolbar from './components/ResultsToolbar.jsx';
@@ -10,18 +20,8 @@ import PdfPreview from './components/PdfPreview.jsx';
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 const MAX_RETRY_POLLS = 90; // ~3 minutes max for retry
 
-function findFirstProblematicRow(results) {
-  if (!results) return null;
-  return results.findIndex(r => {
-    if (r.error) return true;
-    if (!r.fields) return true;
-    return Object.values(r.fields).some(
-      f => f.confidence === 'low' || f.confidence === 'medium' || !f.value
-    );
-  });
-}
-
 export default function App() {
+  const [authed, setAuthed] = useState(() => Boolean(getToken()));
   const [results, setResults] = useState(null);
   const [files, setFiles] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -32,6 +32,9 @@ export default function App() {
 
   const abortRef = useRef(null);
   const previewUrlRef = useRef(null);
+
+  // Token gate: react to token set (login) and token cleared (401 mid-session)
+  useEffect(() => onAuthChange(setAuthed), []);
 
   // Cleanup object URL on unmount
   useEffect(() => {
@@ -100,22 +103,13 @@ export default function App() {
       setResults(extractedResults);
       setLoading(false);
       setProgress(null);
-
-      // // Auto-open first problematic row
-      // const problemIdx = findFirstProblematicRow(extractedResults);
-      // if (problemIdx >= 0) {
-      //   // Need to use the files from current closure for object URL
-      //   if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
-      //   previewUrlRef.current = URL.createObjectURL(files[problemIdx]);
-      //   setSelectedRow(problemIdx);
-      // }
     } catch (err) {
       if (err.message === 'Cancelled') {
         setLoading(false);
         setProgress(null);
         return;
       }
-      setError(err.response?.data?.error?.message || err.message || 'Greska prilikom obrade');
+      setError(getErrorMessage(err, 'Greška prilikom obrade'));
       setLoading(false);
       setProgress(null);
     }
@@ -171,7 +165,7 @@ export default function App() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError('Greska prilikom preuzimanja Excel fajla');
+      setError(getErrorMessage(err, 'Greška prilikom preuzimanja Excel fajla'));
     } finally {
       setExporting(false);
     }
@@ -188,11 +182,14 @@ export default function App() {
       return updated;
     });
 
-    const markFailed = () => {
+    const markFailed = (message) => {
       setResults(prev => {
         if (!prev) return prev;
         const updated = [...prev];
-        updated[rowIndex] = { filename: file.name, error: 'Ponovni pokušaj nije uspeo' };
+        updated[rowIndex] = {
+          filename: file.name,
+          error: message || 'Ponovni pokušaj nije uspeo',
+        };
         return updated;
       });
     };
@@ -200,6 +197,7 @@ export default function App() {
     try {
       const batch = await submitBatch([file]);
       let pollCount = 0;
+      let transientFailures = 0;
       const poll = async () => {
         pollCount++;
         if (pollCount > MAX_RETRY_POLLS) {
@@ -208,6 +206,7 @@ export default function App() {
         }
         try {
           const status = await pollBatch(batch.batchId);
+          transientFailures = 0;
           if (status.status === 'complete') {
             setResults(prev => {
               if (!prev) return prev;
@@ -219,12 +218,18 @@ export default function App() {
           }
           setTimeout(poll, 2000);
         } catch (pollErr) {
-          markFailed();
+          // Network/5xx blips are retryable; 401/404 are fatal immediately
+          if (isTransientError(pollErr) && transientFailures < 3) {
+            transientFailures++;
+            setTimeout(poll, 2000 * (transientFailures + 1));
+            return;
+          }
+          markFailed(getErrorMessage(pollErr, 'Ponovni pokušaj nije uspeo'));
         }
       };
       poll();
     } catch (err) {
-      markFailed();
+      markFailed(getErrorMessage(err, 'Ponovni pokušaj nije uspeo'));
     }
   }, [files]);
 
@@ -243,6 +248,19 @@ export default function App() {
 
   const hasResults = results && results.length > 0;
   const previewOpen = selectedRow !== null;
+
+  // No token (or a 401 cleared it) — show the token gate.
+  // App stays mounted, so in-memory results survive re-authentication.
+  if (!authed) {
+    return (
+      <div className="app">
+        <Header />
+        <main className="main-content">
+          <TokenGate />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="app">

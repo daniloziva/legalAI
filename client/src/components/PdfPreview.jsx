@@ -51,7 +51,7 @@ function PreviewField({ label, field, fieldKey, onUpdate }) {
   ].join(' ');
 
   const confidenceLabel =
-    isEmpty ? 'Missing' : isLow ? 'Low' : isMedium ? 'Review' : 'OK';
+    isEmpty ? 'Nedostaje' : isLow ? 'Niska' : isMedium ? 'Srednja' : 'Visoka';
 
   return (
     <div className={fieldClass}>
@@ -75,7 +75,7 @@ function PreviewField({ label, field, fieldKey, onUpdate }) {
           onFocus={handleFocus}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          placeholder={isEmpty ? 'Click to enter value...' : ''}
+          placeholder={isEmpty ? 'Kliknite da unesete vrednost...' : ''}
         />
         {!focused && <Pencil size={12} className="preview-field-edit-icon" />}
       </div>

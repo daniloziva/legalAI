@@ -121,6 +121,9 @@ export default function ResultsTable({
                   onClick={() => onSelectRow(idx)}
                 >
                   <td className="col-num">{idx + 1}</td>
+                  <td className="col-doc" title={result.filename}>
+                    {truncateName(result.filename)}
+                  </td>
                   <td colSpan={fieldColSpan} className="results-error-cell">
                     <span className="results-error-message">
                       {result.error}
@@ -130,7 +133,7 @@ export default function ResultsTable({
                       onClick={(e) => { e.stopPropagation(); onRetryRow(idx); }}
                       type="button"
                     >
-                      Pokusaj ponovo
+                      Pokušaj ponovo
                     </button>
                   </td>
                   <td className="col-status">
@@ -144,6 +147,9 @@ export default function ResultsTable({
               return (
                 <tr key={idx} className="results-row results-row--retrying">
                   <td className="col-num">{idx + 1}</td>
+                  <td className="col-doc" title={result.filename}>
+                    {truncateName(result.filename)}
+                  </td>
                   <td colSpan={fieldColSpan}>
                     <span className="results-retrying-text">Ponovna obrada...</span>
                   </td>
