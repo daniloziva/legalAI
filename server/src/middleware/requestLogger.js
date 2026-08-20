@@ -3,6 +3,10 @@ const pinoHttp = require('pino-http');
 
 const logger = pino({
   level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  redact: {
+    paths: ['req.headers.authorization'],
+    censor: '[REDACTED]',
+  },
   transport: process.env.NODE_ENV !== 'production'
     ? { target: 'pino/file', options: { destination: 1 } }
     : undefined,

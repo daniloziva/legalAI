@@ -4,8 +4,24 @@ const axios = require('axios');
 const { z } = require('zod');
 const { env } = require('../config/env');
 const { logger } = require('../middleware/requestLogger');
+const { normalizeField } = require('../lib/translit');
 
 const RETRY_DELAY_MS = 5000;
+const REQUEST_TIMEOUT_MS = 30000;
+const MAX_FIELD_VALUE_LENGTH = 1000;
+
+// Generic, client-safe message — full detail stays in server logs only.
+const CLIENT_MSG_EXTRACTION_FAILED = 'Ekstrakcija podataka nije uspela';
+
+/**
+ * Build an Error whose `message` (server logs) carries full detail while
+ * `clientMessage` is a short generic string safe to show to the client.
+ */
+function fail(detail) {
+  const err = new Error(detail);
+  err.clientMessage = CLIENT_MSG_EXTRACTION_FAILED;
+  return err;
+}
 
 // Load system prompt once at module init
 const systemPrompt = fs.readFileSync(
@@ -14,8 +30,10 @@ const systemPrompt = fs.readFileSync(
 );
 
 // Zod schema for validating GPT response shape
+// Truncate instead of rejecting: a hostile/verbose value should not fail the
+// whole file, and the export endpoint enforces a hard .max(1000) anyway.
 const fieldSchema = z.object({
-  value: z.string(),
+  value: z.string().transform((v) => v.slice(0, MAX_FIELD_VALUE_LENGTH)),
   confidence: z.enum(['high', 'medium', 'low']),
 });
 
@@ -58,15 +76,19 @@ async function extract(ocrText) {
 
   let response;
   try {
-    response = await axios.post(url, body, { headers });
+    response = await axios.post(url, body, { headers, timeout: REQUEST_TIMEOUT_MS });
   } catch (err) {
     // Retry once on 429
     if (err.response && err.response.status === 429) {
       logger.warn('Extraction rate limited (429), retrying once after 5s');
       await sleep(RETRY_DELAY_MS);
-      response = await axios.post(url, body, { headers });
+      try {
+        response = await axios.post(url, body, { headers, timeout: REQUEST_TIMEOUT_MS });
+      } catch (retryErr) {
+        throw fail(`Extraction API call failed: ${retryErr.response?.status || retryErr.message}`);
+      }
     } else {
-      throw new Error(`Extraction API call failed: ${err.response?.status || err.message}`);
+      throw fail(`Extraction API call failed: ${err.response?.status || err.message}`);
     }
   }
 
@@ -81,24 +103,35 @@ async function extract(ocrText) {
   // Parse the JSON content from the response
   const rawContent = response.data.choices?.[0]?.message?.content;
   if (!rawContent) {
-    throw new Error('Extraction failed: empty response from model');
+    throw fail('Extraction failed: empty response from model');
   }
 
   let parsed;
   try {
     parsed = JSON.parse(rawContent);
   } catch {
-    throw new Error('Extraction failed: invalid JSON in model response');
+    throw fail('Extraction failed: invalid JSON in model response');
   }
 
   // Validate shape with Zod
   const result = extractionSchema.safeParse(parsed);
   if (!result.success) {
     const issues = result.error.flatten().fieldErrors;
-    throw new Error(`Extraction failed: response shape invalid — ${JSON.stringify(issues)}`);
+    throw fail(`Extraction failed: response shape invalid — ${JSON.stringify(issues)}`);
   }
 
-  return { fields: result.data, tokenUsage };
+  // Deterministic Cyrillic -> Latin transliteration on name fields only —
+  // the model returns them verbatim from the document (see extract-v2.txt).
+  // brojPredmeta is deliberately NOT transliterated: lawyers search court
+  // databases with the exact string as printed, including Cyrillic И.ИВК.
+  const fields = {
+    ...result.data,
+    javniIzvrsitelj: normalizeField(result.data.javniIzvrsitelj),
+    imeStranke: normalizeField(result.data.imeStranke),
+    imeKlijenta: normalizeField(result.data.imeKlijenta),
+  };
+
+  return { fields, tokenUsage };
 }
 
 function sleep(ms) {

@@ -4,6 +4,7 @@ const envSchema = z.object({
   PORT:                     z.string().default('3001').transform(Number).pipe(z.number().int().positive()),
   NODE_ENV:                 z.enum(['development', 'production']).default('development'),
   CORS_ORIGIN:              z.string().default('http://localhost:5173'),
+  APP_TOKEN:                z.string().min(16),
   AZURE_DI_ENDPOINT:        z.string().url(),
   AZURE_DI_KEY:             z.string().min(1),
   AZURE_DI_API_VERSION:     z.string().default('2024-11-30'),

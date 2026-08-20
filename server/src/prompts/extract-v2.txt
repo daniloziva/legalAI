@@ -4,13 +4,15 @@ You will receive OCR text extracted from a scanned document. The text is in Serb
 
 Extract the following fields from the document. For each field, provide the extracted value and a confidence level.
 
+OUTPUT SCRIPT: Do NOT transliterate. Return every extracted value VERBATIM, in the exact script it appears in the document (Cyrillic stays Cyrillic, Latin stays Latin). Script conversion is handled deterministically downstream. In particular, brojPredmeta must be copied character-for-character as printed — lawyers use this exact string, including the Cyrillic "И.ИВК" form, to search court databases, and any script change breaks those searches.
+
 FIELDS:
 
 1. ban (account/reference number) - A long numeric identifier, typically 9-14 digits, often found in barcodes, headers, or near account references. Examples from real data: "52377458100001", "542197946". This is NOT the case number — it is a separate banking/system reference. Look in document headers, near barcodes, or after "рачун", "број рачуна", "позив на број", or in payment slip sections.
 
-2. javniIzvrsitelj (public enforcement officer name) - The full name of the javni izvršitelj (public enforcement officer). This is the person or office that issued the document. Look after "Јавни извршитељ", "ЈИ", "извршитељ", or in the document header/letterhead. Return the full name (e.g., "Miloš Perić", "Марија Гачић"). This is NOT the party/debtor and NOT the attorney.
+2. javniIzvrsitelj (public enforcement officer name) - The full name of the javni izvršitelj (public enforcement officer). This is the person or office that issued the document. Look after "Јавни извршитељ", "ЈИ", "извршитељ", or in the document header/letterhead. Return the full name exactly as written in the document, in its original script (e.g., "Марија Гачић" stays "Марија Гачић"). This is NOT the party/debtor and NOT the attorney.
 
-3. brojPredmeta (case number / I.Ivk.br) - The enforcement case reference number. Typically formatted as "IIVK 549/2026", "И.ИВК 827/2025", "I.Ivk. 1187/2024", or similar patterns. Look near the top of the document, in headers, or after "И.ИВК", "IIVK", "I.Ivk.", "Посл.бр.", "Број предмета". If the year is abbreviated (e.g., /26), expand it to the full year (e.g., /2026). Always include the "IIVK" prefix in the output.
+3. brojPredmeta (case number / I.Ivk.br) - The enforcement case reference number. Typically formatted as "IIVK 549/2026", "И.ИВК 827/2025", "I.Ivk. 1187/2024", or similar patterns. Look near the top of the document, in headers, or after "И.ИВК", "IIVK", "I.Ivk.", "Посл.бр.", "Број предмета". CRITICAL: copy the case number character-for-character exactly as printed in the document — original script, original prefix, original year format. "И.ИВК 827/2025" stays "И.ИВК 827/2025" (NEVER "IIVK 827/2025"), and an abbreviated year stays abbreviated ("/26" stays "/26", never expanded to "/2026"). Never transliterate, reformat, expand, or normalize any part of it: this exact string is used to search court databases.
 
 4. iznosPredujma (advance payment amount with VAT) - The total monetary amount including PDV (VAT). This is the advance payment ("predujam"), fee, or cost amount. Look after "износ", "укупно", "динара", "РСД", "RSD", "плаћа", "предујам", "трошкови", "такса", "износ од", or near currency values. Extract ONLY the numeric value as a decimal number (e.g., "14208.23", "4203.34"). Use period as decimal separator. Do NOT include currency words. If the document shows both a net amount and a gross (with VAT) amount, extract the gross amount.
 
@@ -31,9 +33,9 @@ FIELDS:
 
 8. valuta (payment deadline in days) - The number of days until the payment is due. Look for phrases like "у року од 8 дана", "u roku od 15 dana", "рок за плаћање", "rok za plaćanje", "валута", "dana od prijema". Extract ONLY the number (e.g., "8", "15", "3", "0"). If the document says payment is due immediately ("одмах", "odmah"), return "0". Do NOT include the word "dana" or any text — return only the number. If no payment deadline is found, set value to an empty string and confidence to "low".
 
-9. imeStranke (party/debtor name) - The full name of the main party (typically the debtor / "извршни дужник"). Look after "тужилац", "тужени", "извршни дужник", "дужник", "окривљени", "подносилац", "странка". Return the full name as it appears.
+9. imeStranke (party/debtor name) - The full name of the main party (typically the debtor / "извршни дужник"). Look after "тужилац", "тужени", "извршни дужник", "дужник", "окривљени", "подносилац", "странка". Return the full name exactly as written in the document, in its original script (e.g., "Петар Јовановић" stays "Петар Јовановић").
 
-10. imeKlijenta (client name) - The name of the CLIENT company that engaged the enforcement. This is typically A1 Serbia, a bank, telecom, or other enterprise. Look for "поверилац", "извршни поверилац", "тужилац" when it is a company, or company identifiers: "д.о.о.", "DOO", "a.d.", "А.Д.", "банка". Prefer company names over personal names.
+10. imeKlijenta (client name) - The name of the CLIENT company that engaged the enforcement. This is typically A1 Serbia, a bank, telecom, or other enterprise. Look for "поверилац", "извршни поверилац", "тужилац" when it is a company, or company identifiers: "д.о.о.", "DOO", "a.d.", "А.Д.", "банка". Prefer company names over personal names. Return the name exactly as written in the document, in its original script (e.g., "А1 Србија д.о.о." stays "А1 Србија д.о.о.").
 
 CONFIDENCE LEVELS:
 - "high": The field was clearly found with an unambiguous label or in an expected location. OCR quality for this text appears good.

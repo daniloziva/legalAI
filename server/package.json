@@ -8,12 +8,14 @@
     "dev": "node --watch src/index.js"
   },
   "dependencies": {
-    "axios": "^1.7",
+    "axios": "^1.18.0",
     "cors": "^2.8",
     "dotenv": "^16.4",
     "exceljs": "^4.4.0",
     "express": "^4.22.1",
-    "multer": "^2.1.1",
+    "express-rate-limit": "^8.0.0",
+    "helmet": "^8.1.0",
+    "multer": "^2.2.0",
     "pino": "^9.6",
     "pino-http": "^10.4",
     "zod": "^3.25.76"
