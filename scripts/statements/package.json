@@ -1,0 +1,10 @@
+{
+  "name": "rsp-statement-probe",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Parses bank statement PDFs (UniCredit Bank Srbija daily statement) and refuses results it cannot fully account for.",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": { "parse": "node statement-probe.mjs" },
+  "dependencies": { "pdfjs-dist": "4.10.38" }
+}
